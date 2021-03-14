@@ -89,7 +89,7 @@ public:
 
 // 2. Создать класс Car(автомобиль) с полями company(компания) и model(модель).Классы - наследники: PassengerCar(легковой автомобиль) и Bus(автобус).
 // От этих классов наследует класс Minivan(минивэн).Создать конструкторы для каждого из классов, чтобы они выводили данные о классах.
-// Создать объекты для каждого из классов и посмотреть, в какой последовательности выполняются конструкторы.Обратить внимание на проблему «алмаз смерти».
+// Создать объекты для каждого из классов и посмотреть, в какой последовательности выполняются конструкторы. Обратить внимание на проблему «алмаз смерти».
 // Примечание : если использовать виртуальный базовый класс, то объект самого "верхнего" базового класса создает самый "дочерний" класс.
 
 class Car
@@ -154,7 +154,7 @@ public:
 //    унарный оператор(-)
 //    логические операторы сравнения двух дробей(== , != , <, >, <= , >= ).
 //  Примечание : Поскольку операторы < и >= , > и <= — это логические противоположности, попробуйте перегрузить один через другой.
-//   Продемонстрировать использование перегруженных операторов.
+//  Продемонстрировать использование перегруженных операторов.
 
 class Fraction
 {
@@ -168,18 +168,126 @@ public:
 		m_numerator = 0;
 		m_denominator = 1;
 	}
-
-	Fraction(int numerator, int denominator) // конструктор с проверкой
+	
+	Fraction(int numerator, int denominator) // конструктор с проверкой на ноль
 	{
 		assert(denominator != 0);
 		m_numerator = numerator;
 		m_denominator = denominator;
 	}
+
 	int getNumerator() { return m_numerator; }
 	int getDenominator() { return m_denominator; }
-	double getValue() { return static_cast<double>(m_numerator) / m_denominator; }
 	
+	friend Fraction operator_plus(const Fraction& fract1, const Fraction& fract2);
+	friend Fraction operator_minus(const Fraction& fract1, const Fraction& fract2);
+	friend Fraction operator_multiplication(const Fraction& fract1, const Fraction& fract2);
+	friend Fraction operator_division(const Fraction& fract1, const Fraction& fract2);
+
+	friend Fraction operator_minus_unar(const Fraction& fract1);
+
+	friend bool operator_equal(const Fraction& fract1, const Fraction& fract2);
+	friend bool operator_nonEqual(bool operator_equal);
+	friend bool operator_more(const Fraction& fract1, const Fraction& fract2);
+	friend bool operator_less_equal(bool operator_more);
+	friend bool operator_less(const Fraction& fract1, const Fraction& fract2);
+	friend bool operator_more_equal(bool operator_less);
 };
+
+int gcd(int a, int b) {                           //наибольший общий делитель
+	while (b > 0) {
+		int c = a % b;
+		a = b;
+		b = c;
+	}
+	return a;
+}
+
+int lcm(int a, int b) {                           // наименьшее общее кратное
+	return gcd(a, b) * a * b;
+}
+
+Fraction operator_plus(const Fraction& fract1, const Fraction& fract2)
+{
+	int lcm_tmp = lcm(fract1.m_denominator, fract2.m_denominator);
+
+	int operator_plus_denominator = fract1.m_denominator * (lcm_tmp / fract1.m_denominator);
+	int operator_plus_numerator = fract1.m_numerator * (lcm_tmp / fract1.m_denominator) + fract2.m_numerator * (lcm_tmp / fract2.m_denominator);
+	
+	return Fraction(operator_plus_numerator, operator_plus_denominator);
+}
+
+Fraction operator_minus(const Fraction& fract1, const Fraction& fract2)
+{
+	int lcm_tmp = lcm(fract1.m_denominator, fract2.m_denominator);
+
+	int operator_minus_denominator = fract1.m_denominator * (lcm_tmp / fract1.m_denominator);
+	int operator_minus_numerator = fract1.m_numerator * (lcm_tmp / fract1.m_denominator) - fract2.m_numerator * (lcm_tmp / fract2.m_denominator);
+
+	return Fraction(operator_minus_numerator, operator_minus_denominator);
+}
+
+Fraction operator_multiplication(const Fraction& fract1, const Fraction& fract2)
+{
+	int operator_multiplication_denominator = fract1.m_denominator * fract2.m_denominator;
+	int operator_multiplication_numerator = fract1.m_numerator * fract2.m_numerator;
+
+	return Fraction(operator_multiplication_numerator, operator_multiplication_denominator);
+}
+
+Fraction operator_division(const Fraction& fract1, const Fraction& fract2)
+{
+	int operator_division_denominator = fract1.m_denominator * fract2.m_numerator;
+	int operator_division_numerator = fract1.m_numerator * fract2.m_denominator;
+
+	return Fraction(operator_division_numerator, operator_division_denominator);
+}
+
+Fraction operator_minus_unar(const Fraction& fract1) {
+	int operator_division_numerator = -fract1.m_numerator;
+	int operator_division_denominator = fract1.m_denominator;
+	return Fraction(operator_division_numerator, operator_division_denominator);
+}
+
+
+bool operator_equal(const Fraction& fract1, const Fraction& fract2) 
+{
+	int lcm_tmp = lcm(fract1.m_denominator, fract2.m_denominator);
+
+	int operator_equal_denominator = fract1.m_denominator * (lcm_tmp / fract1.m_denominator);
+	int operator_numerator1 = fract1.m_numerator * (lcm_tmp / fract1.m_denominator);
+	int operator_numerator2 = fract2.m_numerator * (lcm_tmp / fract2.m_denominator);
+
+	return operator_numerator1 == operator_numerator2;
+}
+
+bool operator_nonEqual(bool operator_equal) { return !operator_equal; }
+
+bool operator_more(const Fraction& fract1, const Fraction& fract2)
+{
+	int lcm_tmp = lcm(fract1.m_denominator, fract2.m_denominator);
+
+	int operator_equal_denominator = fract1.m_denominator * (lcm_tmp / fract1.m_denominator);
+	int operator_numerator1 = fract1.m_numerator * (lcm_tmp / fract1.m_denominator);
+	int operator_numerator2 = fract2.m_numerator * (lcm_tmp / fract2.m_denominator);
+
+	return operator_numerator1 > operator_numerator2;
+}
+
+bool operator_less_equal(bool operator_more) { return !operator_more; }
+
+bool operator_less(const Fraction& fract1, const Fraction& fract2)
+{
+	int lcm_tmp = lcm(fract1.m_denominator, fract2.m_denominator);
+
+	int operator_equal_denominator = fract1.m_denominator * (lcm_tmp / fract1.m_denominator);
+	int operator_numerator1 = fract1.m_numerator * (lcm_tmp / fract1.m_denominator);
+	int operator_numerator2 = fract2.m_numerator * (lcm_tmp / fract2.m_denominator);
+
+	return operator_numerator1 < operator_numerator2;
+}
+
+bool operator_more_equal(bool operator_less) { return !operator_less; }
 
 
 // 4. Создать класс Card, описывающий карту в игре БлэкДжек.У этого класса должно быть три поля : масть, значение карты и положение карты
@@ -279,11 +387,11 @@ public:
 int main()
 {
 
-	// Task 1.
+	// Task 1. Done.  
 	
-	
+	std::cout << "Task 1" << std::endl;
 	Circle Circle;
-	Circle.setRadius(1.0);
+	Circle.setRadius(10.0);
 	std::cout << "square of Circle =  " << Circle.area() << std::endl;
 
 	Parallelogram Parallelogram;
@@ -307,7 +415,9 @@ int main()
 	std::cout << "square of Rhombus =  " << Rhombus.area() << std::endl;
 	
 
-	// Task 2. Done. Прописала и конструкторы, и деструкторы, чтобы было видно, что когда создается и удаляется.
+	// Task 2. Done. Прописала и конструкторы, и деструкторы, чтобы было видно, что когда создается и удаляется. Для просмотра остальных заданий это лучше закомментить,
+	// ибо мусорит безбожно.
+	std::cout << "Task 2" << std::endl;
 	Car Car ("BMV", "X5");
 	std::cout << "Car is " << Car.getModel() << " by "<< Car.getCompany() << " company." << std::endl;
 	PassengerCar PassengerCar("Hundai", "Solaris");
@@ -318,12 +428,67 @@ int main()
 	std::cout << "Car is " << Minivan.getModel() << " by " << Minivan.getCompany() << " company." << std::endl;
 
 
-	// Task 3.
+	// Task 3. Done. 
+
+	std::cout << "Task 3" << std::endl;
+	Fraction fract1(2, 3);
+	Fraction fract2(1, 7);
+
+	std::cout << "Arithmetic operators" << std::endl;
+
+	Fraction NewFractionPlus = operator_plus(fract1, fract2);
+	std::cout << fract1.getNumerator() << "/" << fract1.getDenominator() << " + " << fract2.getNumerator() << "/" << fract2.getDenominator() << " = " 
+		<< NewFractionPlus.getNumerator() << "/" << NewFractionPlus.getDenominator() << std::endl;
+	
+	Fraction NewFractionMinus = operator_minus(fract1, fract2);
+	std::cout << fract1.getNumerator() << "/" << fract1.getDenominator() << " - " << fract2.getNumerator() << "/" << fract2.getDenominator() << " = " 
+		<< NewFractionMinus.getNumerator() << "/" << NewFractionMinus.getDenominator() << std::endl;
+	
+	Fraction NewFractionMultiplication = operator_multiplication(fract1, fract2);
+	std::cout << fract1.getNumerator()<<"/"<<fract1.getDenominator()<< " * "<< fract2.getNumerator() << "/" <<fract2.getDenominator()<< " = "
+		<< NewFractionMultiplication.getNumerator() << "/" << NewFractionMultiplication.getDenominator() << std::endl;
+
+	Fraction NewFractionDivision = operator_division(fract1, fract2);
+	std::cout << fract1.getNumerator() << "/" << fract1.getDenominator() << " / " << fract2.getNumerator() << "/" << fract2.getDenominator() << " = " 
+		<< NewFractionDivision.getNumerator() << "/" << NewFractionDivision.getDenominator() << std::endl;
+
+	std::cout << "Unary operator" << std::endl;
+
+	Fraction NewFractionUnar = operator_minus_unar(fract1);
+	std::cout << " - " << fract1.getNumerator() << "/" << fract1.getDenominator() << " = " << NewFractionUnar.getNumerator() << "/" 
+		<< NewFractionUnar.getDenominator() << std::endl;
+
+	std::cout << "Logical operators" << std::endl;
+
+	// логический оператор ==
+	std::cout << fract1.getNumerator() << "/" << fract1.getDenominator() << (operator_equal(fract1, fract2) ? " " : " !")<< "= " << fract2.getNumerator() 
+		<< "/" << fract2.getDenominator()<<std::endl;
+	
+	// логический оператор != через предыдущий
+	std::cout << fract1.getNumerator() << "/" << fract1.getDenominator() << (operator_nonEqual(operator_equal(fract1, fract2)) ? " !" : " ") << "= " << fract2.getNumerator() 
+		<< "/" << fract2.getDenominator() << std::endl;
+
+	// Логический оператор >
+	std::cout << fract1.getNumerator() << "/" << fract1.getDenominator() << (operator_more(fract1, fract2) ? " > " : " <= ") << fract2.getNumerator()
+		<< "/" << fract2.getDenominator() << std::endl;
+
+	// Логический оператор <= через предыдущий
+	std::cout << fract1.getNumerator() << "/" << fract1.getDenominator() << (operator_less_equal(operator_more(fract1, fract2)) ? " <= " : " > ") << fract2.getNumerator()
+		<< "/" << fract2.getDenominator() << std::endl;
+
+	// Логический оператор <
+	std::cout << fract1.getNumerator() << "/" << fract1.getDenominator() << (operator_less(fract1, fract2) ? " < " : " >= ") << fract2.getNumerator()
+		<< "/" << fract2.getDenominator() << std::endl;
+
+	// Логический оператор >= через предыдущий
+	std::cout << fract1.getNumerator() << "/" << fract1.getDenominator() << (operator_more_equal(operator_less(fract1, fract2)) ? " >= " : " < ") << fract2.getNumerator()
+		<< "/" << fract2.getDenominator() << std::endl;
 
 
 
+	// Task 4. Done. Сделала вывод для проверки - FaceUp и value. Работает, хоть и выводит предупреждение.
 
-	// Task 4. Done. Сделала вывод для проверки - FaceUp и value
+	std::cout << "Task 4" << std::endl;
 	Card card;
 	card.Flip(1);
 	card.GetValue(Card::RANK_king);
